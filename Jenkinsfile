@@ -97,11 +97,10 @@ pipeline
                 script {
                     try {
                         print "*** building and pushing image to Nexus repository ***"
-                            def dockerImageWithTag = 'v1'
-			    sh "docker build --build-arg JAR_VERSION=\'1.0\' --build-arg APP_NAME=\'cargo\' -t ${dockerImageWithTag} ."
+			    sh "docker build -t cargo ."
 						}
                      catch(err) {
-						error(err.message)
+			error(err.message)
                         print "*** Error while building/pushing image ***" 
                     }
                   }  
