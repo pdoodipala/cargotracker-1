@@ -83,16 +83,22 @@ pipeline
                 }
             }
         }
-            stage('Build image') {
-            container = docker.build('jenkins-docker')
-    }
-
-    stage('Push image') {
-      docker.withRegistry('http://localhost:8081/repository/docker-repo/', 'nexus-credentials-id') {
-        container.push("${shortCommit}")
-        container.push('latest')
-      }
-    }
-        
+        steps {
+                script {
+                    try {
+                        print "*** building and pushing image to Nexus repository ***"
+                            def dockerImageWithTag = 'springdemo'
+							sh "docker build --build-arg JAR_VERSION=\'1.0\' --build-arg APP_NAME=\'springdemo\' -t ${dockerImageWithTag} ."
+                            sh '''set +x && echo "${NEXUS_PASSWORD}" | docker login -u ${NEXUS_USER} ${NEXUS_HOST}/repository/docker-repo/ --password-stdin'''
+                            sh "docker tag ${dockerImageWithTag} ${NEXUS_DOCKER_TAG}/${dockerImageWithTag}:${ver}"
+							sh "docker push ${NEXUS_DOCKER_TAG}/${dockerImageWithTag}:${ver}"
+                            sh "docker rmi -f ${dockerImageWithTag} ${NEXUS_DOCKER_TAG}/${dockerImageWithTag}:${ver}"
+						}
+                     catch(err) {
+						error(err.message)
+                        print "*** Error while building/pushing image ***" 
+                    }
+                  }  
+        }
     }
 }
