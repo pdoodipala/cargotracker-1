@@ -83,13 +83,22 @@ pipeline
                 }
             }
         }
-        steps {
+                stage('docker-build-and-push-image-on-branch') {
+          agent {
+                    label 'master'
+                }
+			when {
+                
+                    branch 'master'
+                }                
+            
+            steps {
                 script {
                     try {
                         print "*** building and pushing image to Nexus repository ***"
                             def dockerImageWithTag = 'springdemo'
 							sh "docker build --build-arg JAR_VERSION=\'1.0\' --build-arg APP_NAME=\'springdemo\' -t ${dockerImageWithTag} ."
-                            sh '''set +x && echo "${NEXUS_PASSWORD}" | docker login -u ${NEXUS_USER} ${NEXUS_HOST}/repository/docker-repo/ --password-stdin'''
+                            sh '''set +x && echo "${NEXUS_PASSWORD}" | docker login -u ${NEXUS_USER} ${NEXUS_HOST}/repository/docker-nonprod/ --password-stdin'''
                             sh "docker tag ${dockerImageWithTag} ${NEXUS_DOCKER_TAG}/${dockerImageWithTag}:${ver}"
 							sh "docker push ${NEXUS_DOCKER_TAG}/${dockerImageWithTag}:${ver}"
                             sh "docker rmi -f ${dockerImageWithTag} ${NEXUS_DOCKER_TAG}/${dockerImageWithTag}:${ver}"
@@ -99,6 +108,7 @@ pipeline
                         print "*** Error while building/pushing image ***" 
                     }
                   }  
+                }
         }
     }
 }
