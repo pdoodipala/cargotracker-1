@@ -16,6 +16,9 @@ pipeline
         NEXUS_REPOSITORY = "maven-repo"
         // Jenkins credential id to authenticate to Nexus OSS
         NEXUS_CREDENTIAL_ID = "eb076cd8-8d23-4a6d-b867-4e9a977dd444"
+	dockerImageWithTag
+	DOCKERIMAGE_TAG = ""
+	
     }
 
     stages 
@@ -96,12 +99,8 @@ pipeline
                 script {
                     try {
                         print "*** building and pushing image to Nexus repository ***"
-                            def dockerImageWithTag = 'springdemo'
-							sh "docker build --build-arg JAR_VERSION=\'1.0\' --build-arg APP_NAME=\'springdemo\' -t ${dockerImageWithTag} ."
-                            sh '''set +x && echo "${NEXUS_PASSWORD}" | docker login -u ${NEXUS_USER} ${NEXUS_HOST}/repository/docker-nonprod/ --password-stdin'''
-                            sh "docker tag ${dockerImageWithTag} ${NEXUS_DOCKER_TAG}/${dockerImageWithTag}:${ver}"
-							sh "docker push ${NEXUS_DOCKER_TAG}/${dockerImageWithTag}:${ver}"
-                            sh "docker rmi -f ${dockerImageWithTag} ${NEXUS_DOCKER_TAG}/${dockerImageWithTag}:${ver}"
+                            def dockerImageWithTag = 'v1'
+			    sh "docker build --build-arg JAR_VERSION=\'1.0\' --build-arg APP_NAME=\'cargo\' -t ${dockerImageWithTag} ."
 						}
                      catch(err) {
 						error(err.message)
