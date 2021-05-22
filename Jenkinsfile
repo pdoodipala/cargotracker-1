@@ -83,6 +83,16 @@ pipeline
                 }
             }
         }
+            stage('Build image') {
+            container = docker.build('jenkins-docker')
+    }
 
+    stage('Push image') {
+      docker.withRegistry('http://localhost:8081/repository/docker-repo/', 'nexus-credentials-id') {
+        container.push("${shortCommit}")
+        container.push('latest')
+      }
+    }
+        
     }
 }
